@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "node_modules/.bin/nodeunit test/*"
+  },
+  "dependencies": {
+    "nan": "*"
+  },
+  "devDependencies": {
+    "nodeunit": "*"
+  },
+  "gypfile": true
+}
