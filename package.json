@@ -1,10 +1,14 @@
 {
   "name": "xenstat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node library to collect Xen hypervisor stats using Libxenstat",
   "author": "Simon Boulet <simon@nostalgeek.com>",
   "scripts": {
     "test": "node_modules/.bin/nodeunit test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/siboulet/node-xenstat"
   },
   "dependencies": {
     "nan": "*",
