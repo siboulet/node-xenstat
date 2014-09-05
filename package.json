@@ -1,4 +1,8 @@
 {
+  "name": "xenstat",
+  "version": "0.1.0",
+  "description": "Node library to collect Xen hypervisor stats using Libxenstat",
+  "author": "Simon Boulet <simon@nostalgeek.com>",
   "scripts": {
     "test": "node_modules/.bin/nodeunit test/*"
   },
