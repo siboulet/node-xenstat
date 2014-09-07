@@ -128,44 +128,43 @@ void Domain::Init(Handle<Object> target) {
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("id"), Domain::GetId);
+    NanNew("id"), GetId);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("name"), Domain::GetName);
+    NanNew("name"), GetName);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("cpu_ns"), Domain::GetCpuNs);
+    NanNew("cpu_ns"), GetCpuNs);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_vcpus"), Domain::GetNumVcpus);
+    NanNew("num_vcpus"), GetNumVcpus);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("vcpus"), Domain::GetVcpus);
+    NanNew("vcpus"), GetVcpus);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("cur_mem"), Domain::GetCurMem);
+    NanNew("cur_mem"), GetCurMem);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("max_mem"), Domain::GetMaxMem);
+    NanNew("max_mem"), GetMaxMem);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("ssid"), Domain::GetSsid);
+    NanNew("ssid"), GetSsid);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("dying"), Domain::GetDying);
+    NanNew("dying"), GetDying);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("crashed"), Domain::GetCrashed);
+    NanNew("crashed"), GetCrashed);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("shutdown"), Domain::GetShutdown);
+    NanNew("shutdown"), GetShutdown);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("paused"), Domain::GetPaused);
+    NanNew("paused"), GetPaused);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("blocked"), Domain::GetBlocked);
+    NanNew("blocked"), GetBlocked);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("running"), Domain::GetRunning);
+    NanNew("running"), GetRunning);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_networks"), Domain::GetNumNetworks);
+    NanNew("num_networks"), GetNumNetworks);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("networks"), Domain::GetNetworks);
+    NanNew("networks"), GetNetworks);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_vbds"), Domain::GetNumVbds);
+    NanNew("num_vbds"), GetNumVbds);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("vbds"), Domain::GetVbds);
+    NanNew("vbds"), GetVbds);
 
-  Domain::constructor = Persistent<Function>::New(tpl->GetFunction());
-  target->Set(String::NewSymbol("Domain"), constructor);
+  constructor = Persistent<Function>::New(tpl->GetFunction());
 }
 
 } // namespace

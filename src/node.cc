@@ -155,29 +155,28 @@ void Node::Init(Handle<Object> target) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("xen_version"), Node::GetXenVersion);
+    NanNew("xen_version"), GetXenVersion);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("tot_mem"), Node::GetTotMem);
+    NanNew("tot_mem"), GetTotMem);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("free_mem"), Node::GetFreeMem);
+    NanNew("free_mem"), GetFreeMem);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("freeable_mb"), Node::GetFreeableMb);
+    NanNew("freeable_mb"), GetFreeableMb);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_domains"), Node::GetNumDomains);
+    NanNew("num_domains"), GetNumDomains);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_cpus"), Node::GetNumCpus);
+    NanNew("num_cpus"), GetNumCpus);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("cpu_hz"), Node::GetCpuHz);
+    NanNew("cpu_hz"), GetCpuHz);
   tpl->InstanceTemplate()->SetAccessor(
-    NanNew("domains"), Node::GetDomains);
+    NanNew("domains"), GetDomains);
 
   tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainById"),
     FunctionTemplate::New(GetDomainById)->GetFunction());
   tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainByName"),
     FunctionTemplate::New(GetDomainByName)->GetFunction());
 
-  Node::constructor = Persistent<Function>::New(tpl->GetFunction());
-  target->Set(String::NewSymbol("Node"), constructor);
+  constructor = Persistent<Function>::New(tpl->GetFunction());
 }
 
 } // namespace
