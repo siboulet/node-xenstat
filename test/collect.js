@@ -5,6 +5,8 @@ module.exports = {
     xenstat.collect(function(err, stats) {
       test.ifError(err);
       test.ok(stats && typeof stats === 'object');
+      test.ok(stats.num_domains >= 1);
+      test.strictEqual(Object.keys(stats).length, 8);
       test.done();
     });
   },
@@ -12,6 +14,8 @@ module.exports = {
   'Collect synchronous': function(test) {
     var stats = xenstat.collectSync();
     test.ok(stats && typeof stats === 'object');
+    test.ok(stats.num_domains >= 1);
+    test.strictEqual(Object.keys(stats).length, 8);
     test.done();
   },
 };
