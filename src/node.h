@@ -14,6 +14,7 @@ class Node : public ObjectWrap {
     ~Node();
 
     static NAN_METHOD(New);
+
     static NAN_GETTER(GetXenVersion);
     static NAN_GETTER(GetTotMem);
     static NAN_GETTER(GetFreeMem);
@@ -22,6 +23,9 @@ class Node : public ObjectWrap {
     static NAN_GETTER(GetNumCpus);
     static NAN_GETTER(GetCpuHz);
     static NAN_GETTER(GetDomains);
+
+    static NAN_METHOD(GetDomainById);
+    static NAN_METHOD(GetDomainByName);
 
     xenstat_node *xnode_;
 };

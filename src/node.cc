@@ -97,11 +97,63 @@ NAN_GETTER(Node::GetDomains) {
   NanReturnValue(array);
 }
 
+NAN_METHOD(Node::GetDomainById) {
+  NanScope();
+  Node* node = ObjectWrap::Unwrap<Node>(args.This());
+
+  if (!args[0]->IsNumber()) {
+    NanReturnUndefined();
+  }
+
+  uint32_t id = args[0]->Uint32Value();
+
+  Local<Value> argv[] = {
+    NanNew<External>(xenstat_node_domain(node->xnode_, id))
+  };
+
+  Handle<Object> domain = Domain::constructor->NewInstance(1, argv);
+
+  NanReturnValue(domain);
+}
+
+NAN_METHOD(Node::GetDomainByName) {
+  NanScope();
+  Node* node = ObjectWrap::Unwrap<Node>(args.This());
+
+  if (!args[0]->IsString()) {
+    NanReturnUndefined();
+  }
+
+  std::string name = *NanAsciiString(args[0]);
+
+  // Libxenstat doesn't provide a method for retrieving domain by
+  // name. We need to loop through each domain and compare name.
+
+  uint32_t num_domains = xenstat_node_num_domains(node->xnode_);
+
+  for (uint32_t i = 0; i < num_domains; ++i) {
+    xenstat_domain *xdomain = xenstat_node_domain_by_index(node->xnode_, i);
+
+    if (name == xenstat_domain_name(xdomain)) {
+      // Found match
+      Local<Value> argv[] = {
+        NanNew<External>(xdomain)
+      };
+
+      Handle<Object> domain = Domain::constructor->NewInstance(1, argv);
+      NanReturnValue(domain);
+    }
+  }
+
+  NanReturnUndefined();
+}
+
 void Node::Init(Handle<Object> target) {
   NanScope();
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
   tpl->InstanceTemplate()->SetAccessor(
     NanNew("xen_version"), Node::GetXenVersion);
   tpl->InstanceTemplate()->SetAccessor(
@@ -118,6 +170,11 @@ void Node::Init(Handle<Object> target) {
     NanNew("cpu_hz"), Node::GetCpuHz);
   tpl->InstanceTemplate()->SetAccessor(
     NanNew("domains"), Node::GetDomains);
+
+  tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainById"),
+    FunctionTemplate::New(GetDomainById)->GetFunction());
+  tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainByName"),
+    FunctionTemplate::New(GetDomainByName)->GetFunction());
 
   Node::constructor = Persistent<Function>::New(tpl->GetFunction());
   target->Set(String::NewSymbol("Node"), constructor);
