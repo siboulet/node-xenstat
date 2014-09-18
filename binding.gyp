@@ -9,8 +9,8 @@
       ],
       "libraries": [
         "-lxenstat",
-        "-L<!(/usr/lib/xen-common/bin/xen-dir)/lib",
-        "-Wl,-rpath=<!(/usr/lib/xen-common/bin/xen-dir)/lib"
+        "-L/usr/lib/xen-4.4/lib", "-L/usr/lib/xen-4.3/lib", "-L/usr/lib/xen-4.2/lib",
+        "-Wl,-rpath=/usr/lib/xen-4.4/lib,-rpath=/usr/lib/xen-4.3/lib,-rpath=/usr/lib/xen-4.2/lib"
       ],
     }
   ]
