@@ -102,7 +102,7 @@ NAN_METHOD(Node::GetDomainById) {
   Node* node = ObjectWrap::Unwrap<Node>(args.This());
 
   if (!args[0]->IsNumber()) {
-    NanReturnUndefined();
+    return NanThrowError("Domain ID must be a number");
   }
 
   uint32_t id = args[0]->Uint32Value();
@@ -121,7 +121,7 @@ NAN_METHOD(Node::GetDomainByName) {
   Node* node = ObjectWrap::Unwrap<Node>(args.This());
 
   if (!args[0]->IsString()) {
-    NanReturnUndefined();
+    return NanThrowError("Domain name must be a string");
   }
 
   std::string name = *NanAsciiString(args[0]);
