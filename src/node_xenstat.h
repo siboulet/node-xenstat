@@ -10,8 +10,4 @@ extern "C" {
 using namespace node;
 using namespace v8;
 
-namespace Xenstat {
-  static xenstat_handle *xhandle = xenstat_init();
-}
-
 #endif

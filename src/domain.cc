@@ -2,7 +2,12 @@
 
 namespace Xenstat {
 
-Persistent<Function> Domain::constructor;
+static Persistent<FunctionTemplate> constructor;
+
+Handle<Value> Domain::NewInstance(int argc, Handle<Value> *argv) {
+  Local<FunctionTemplate> constructorHandle = NanNew(constructor);
+  return constructorHandle->GetFunction()->NewInstance(argc, argv);
+}
 
 NAN_METHOD(Domain::New) {
   NanScope();
@@ -164,7 +169,7 @@ void Domain::Init(Handle<Object> target) {
   tpl->InstanceTemplate()->SetAccessor(
     NanNew("vbds"), GetVbds);
 
-  constructor = Persistent<Function>::New(tpl->GetFunction());
+  NanAssignPersistent(constructor, tpl);
 }
 
 } // namespace

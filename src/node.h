@@ -8,7 +8,7 @@ namespace Xenstat {
 class Node : public ObjectWrap {
   public:
     static void Init(Handle<Object> target);
-    static Persistent<Function> constructor;
+    static Handle<Value> NewInstance(int argc, Handle<Value> *argv);
 
     Node(xenstat_node *xnode) : xnode_(xnode) {};
     ~Node();

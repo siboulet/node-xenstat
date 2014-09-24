@@ -4,16 +4,18 @@
 
 namespace Xenstat {
 
+static xenstat_handle *xhandle = xenstat_init();
+
 class CollectWorker : public NanAsyncWorker {
   public:
     CollectWorker(NanCallback *callback, uint32_t flags)
-      : NanAsyncWorker(callback), flags(flags) {}
+      : NanAsyncWorker(callback), flags_(flags) {}
     ~CollectWorker() {}
 
     void Execute() {
       // Asynchronously call xenstat
-      xnode = xenstat_get_node(xhandle, XENSTAT_ALL);
-      if (xnode == NULL)
+      xnode_ = xenstat_get_node(xhandle, XENSTAT_ALL);
+      if (xnode_ == NULL)
         SetErrorMessage("Failed to retrieve statistics from libxenstat");
     }
 
@@ -24,18 +26,18 @@ class CollectWorker : public NanAsyncWorker {
 
       // Create a new Node V8 Object with the xnode from the asynchronous
       // call to xenstat.
-      argv[0] = NanNew<External>(xnode);
-      Handle<Object> node = Node::constructor->NewInstance(1, argv);
+      argv[0] = NanNew<External>(xnode_);
+      Local<Value> node = NanNew<Value>(Node::NewInstance(1, argv));
 
       argv[0] = NanNull();
-      argv[1] = NanNew(node);
+      argv[1] = node;
 
       callback->Call(2, argv);
     }
 
   private:
-    uint32_t flags;
-    xenstat_node *xnode;
+    uint32_t flags_;
+    xenstat_node *xnode_;
 };
 
 NAN_METHOD(Collect) {
@@ -56,9 +58,10 @@ NAN_METHOD(Collect) {
 NAN_METHOD(CollectSync) {
   NanScope();
 
-  Handle<Object> node = Node::constructor->NewInstance();
+  Local<Value> argv[1];
+  argv[0] = NanNew<External>(xenstat_get_node(xhandle, XENSTAT_ALL));
 
-  NanReturnValue(node);
+  NanReturnValue(Node::NewInstance(1, argv));
 }
 
 static void Init(Handle<Object> target) {

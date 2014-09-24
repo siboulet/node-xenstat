@@ -4,32 +4,24 @@
 
 namespace Xenstat {
 
-Persistent<Function> Node::constructor;
+static Persistent<FunctionTemplate> constructor;
 
 Node::~Node() {
   if (xnode_ != NULL)
     xenstat_free_node(xnode_);
 }
 
+Handle<Value> Node::NewInstance(int argc, Handle<Value> *argv) {
+  Local<FunctionTemplate> constructorHandle = NanNew(constructor);
+  return constructorHandle->GetFunction()->NewInstance(argc, argv);
+}
+
 NAN_METHOD(Node::New) {
   NanScope();
   assert(args.IsConstructCall());
 
-  xenstat_node *xnode = NULL;
-
-  // This function can receive an optional xenstat_node object as
-  // argument. If it's present, it will be used to initialize the
-  // underlying xnode object. Otherwise a new xenstat_node object
-  // will be instantiated.
-
-  if (args[0]->IsExternal()) {
-    Local<External> wrap = Local<External>::Cast(args[0]);
-    xnode = static_cast<xenstat_node*>(wrap->Value());
-  } else {
-    xnode = xenstat_get_node(xhandle, XENSTAT_ALL);
-  }
-
-  Node *node = new Node(xnode);
+  Local<External> wrap = Local<External>::Cast(args[0]);
+  Node *node = new Node(static_cast<xenstat_node*>(wrap->Value()));
   node->Wrap(args.This());
 
   NanReturnValue(args.This());
@@ -83,15 +75,14 @@ NAN_GETTER(Node::GetDomains) {
 
   uint32_t num_domains = xenstat_node_num_domains(node->xnode_);
 
-  Local<Array> array = Array::New(num_domains);
+  Local<Array> array = NanNew<Array>(num_domains);
 
   for (uint32_t i = 0; i < num_domains; ++i) {
     Local<Value> argv[] = {
       NanNew<External>(xenstat_node_domain_by_index(node->xnode_, i))
     };
 
-    Handle<Object> domain = Domain::constructor->NewInstance(1, argv);
-    array->Set(i, domain);
+    array->Set(i, Domain::NewInstance(1, argv));
   }
 
   NanReturnValue(array);
@@ -111,9 +102,7 @@ NAN_METHOD(Node::GetDomainById) {
     NanNew<External>(xenstat_node_domain(node->xnode_, id))
   };
 
-  Handle<Object> domain = Domain::constructor->NewInstance(1, argv);
-
-  NanReturnValue(domain);
+  NanReturnValue(Domain::NewInstance(1, argv));
 }
 
 NAN_METHOD(Node::GetDomainByName) {
@@ -140,8 +129,7 @@ NAN_METHOD(Node::GetDomainByName) {
         NanNew<External>(xdomain)
       };
 
-      Handle<Object> domain = Domain::constructor->NewInstance(1, argv);
-      NanReturnValue(domain);
+      NanReturnValue(Domain::NewInstance(1, argv));
     }
   }
 
@@ -171,12 +159,12 @@ void Node::Init(Handle<Object> target) {
   tpl->InstanceTemplate()->SetAccessor(
     NanNew("domains"), GetDomains);
 
-  tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainById"),
-    FunctionTemplate::New(GetDomainById)->GetFunction());
-  tpl->PrototypeTemplate()->Set(String::NewSymbol("getDomainByName"),
-    FunctionTemplate::New(GetDomainByName)->GetFunction());
+  tpl->PrototypeTemplate()->Set(NanNew<String>("getDomainById"),
+    NanNew<FunctionTemplate>(GetDomainById)->GetFunction());
+  tpl->PrototypeTemplate()->Set(NanNew<String>("getDomainByName"),
+    NanNew<FunctionTemplate>(GetDomainByName)->GetFunction());
 
-  constructor = Persistent<Function>::New(tpl->GetFunction());
+  NanAssignPersistent(constructor, tpl);
 }
 
 } // namespace

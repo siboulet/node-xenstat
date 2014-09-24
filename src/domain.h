@@ -8,7 +8,7 @@ namespace Xenstat {
 class Domain : public ObjectWrap {
   public:
     static void Init(Handle<Object> target);
-    static Persistent<Function> constructor;
+    static Handle<Value> NewInstance(int argc, Handle<Value> *argv);
 
     Domain(xenstat_domain *xdomain) : xdomain_(xdomain) {};
 
