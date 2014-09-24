@@ -6,6 +6,7 @@ module.exports = {
       test.ifError(err);
       test.ok(stats && typeof stats === 'object');
       test.ok(stats.num_domains >= 1);
+      test.ok(stats.domains && stats.domains.length === stats.num_domains);
       test.strictEqual(Object.keys(stats).length, 8);
       test.done();
     });
@@ -15,6 +16,7 @@ module.exports = {
     var stats = xenstat.collectSync();
     test.ok(stats && typeof stats === 'object');
     test.ok(stats.num_domains >= 1);
+    test.ok(stats.domains && stats.domains.length === stats.num_domains);
     test.strictEqual(Object.keys(stats).length, 8);
     test.done();
   },
