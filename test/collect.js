@@ -1,5 +1,8 @@
 var xenstat = require('../build/Release/xenstat.node');
 
+if (!xenstat.collect)
+  process.exit(1);
+
 module.exports = {
   'Collect asynchronous': function(test) {
     xenstat.collect(function(err, stats) {

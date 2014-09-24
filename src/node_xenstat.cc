@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "node_xenstat.h"
 #include "domain.h"
 #include "node.h"
@@ -66,6 +68,11 @@ NAN_METHOD(CollectSync) {
 
 static void Init(Handle<Object> target) {
   NanScope();
+
+  if (xhandle == NULL) {
+    std::cerr << "Failed to initialize libxenstat. Is Xen running?" << std::endl << std::endl;
+    return;
+  }
 
   target->Set(NanNew<String>("collect"),
     NanNew<FunctionTemplate>(Collect)->GetFunction());
