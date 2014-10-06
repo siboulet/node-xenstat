@@ -2,7 +2,12 @@
   "targets": [
     {
       "target_name": "xenstat",
-      "sources": [ "src/node_xenstat.cc", "src/domain.cc", "src/node.cc" ],
+      "sources": [
+        "src/node_xenstat.cc",
+        "src/domain.cc",
+        "src/node.cc",
+        "src/network.cc",
+      ],
       "include_dirs" : [
         "<!(node -e \"require('nan')\")",
         "xen"

@@ -3,6 +3,7 @@
 #include "node_xenstat.h"
 #include "domain.h"
 #include "node.h"
+#include "network.h"
 
 namespace Xenstat {
 
@@ -81,6 +82,7 @@ static void Init(Handle<Object> target) {
 
   Domain::Init(target);
   Node::Init(target);
+  Network::Init(target);
 }
 
 } // namespace

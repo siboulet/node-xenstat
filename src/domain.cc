@@ -1,4 +1,5 @@
 #include "domain.h"
+#include "network.h"
 
 namespace Xenstat {
 
@@ -113,7 +114,21 @@ NAN_GETTER(Domain::GetNumNetworks) {
 
 NAN_GETTER(Domain::GetNetworks) {
   NanScope();
-  NanReturnUndefined();
+  Domain* domain = ObjectWrap::Unwrap<Domain>(args.This());
+
+  uint32_t num_networks = xenstat_domain_num_networks(domain->xdomain_);
+
+  Local<Array> array = NanNew<Array>(num_networks);
+
+  for (uint32_t i = 0; i < num_networks; ++i) {
+    Local<Value> argv[] = {
+      NanNew<External>(xenstat_domain_network(domain->xdomain_, i))
+    };
+
+    array->Set(i, Network::NewInstance(1, argv));
+  }
+
+  NanReturnValue(array);
 }
 
 NAN_GETTER(Domain::GetNumVbds) {
