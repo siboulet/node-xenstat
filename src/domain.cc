@@ -1,5 +1,6 @@
 #include "domain.h"
 #include "network.h"
+#include "vbd.h"
 
 namespace Xenstat {
 
@@ -139,7 +140,21 @@ NAN_GETTER(Domain::GetNumVbds) {
 
 NAN_GETTER(Domain::GetVbds) {
   NanScope();
-  NanReturnUndefined();
+  Domain* domain = ObjectWrap::Unwrap<Domain>(args.This());
+
+  uint32_t num_vbds = xenstat_domain_num_vbds(domain->xdomain_);
+
+  Local<Array> array = NanNew<Array>(num_vbds);
+
+  for (uint32_t i = 0; i < num_vbds; ++i) {
+    Local<Value> argv[] = {
+      NanNew<External>(xenstat_domain_vbd(domain->xdomain_, i))
+    };
+
+    array->Set(i, Vbd::NewInstance(1, argv));
+  }
+
+  NanReturnValue(array);
 }
 
 void Domain::Init(Handle<Object> target) {

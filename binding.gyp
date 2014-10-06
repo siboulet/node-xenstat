@@ -7,6 +7,7 @@
         "src/domain.cc",
         "src/node.cc",
         "src/network.cc",
+        "src/vbd.cc",
       ],
       "include_dirs" : [
         "<!(node -e \"require('nan')\")",

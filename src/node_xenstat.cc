@@ -4,6 +4,7 @@
 #include "domain.h"
 #include "node.h"
 #include "network.h"
+#include "vbd.h"
 
 namespace Xenstat {
 
@@ -83,6 +84,7 @@ static void Init(Handle<Object> target) {
   Domain::Init(target);
   Node::Init(target);
   Network::Init(target);
+  Vbd::Init(target);
 }
 
 } // namespace
