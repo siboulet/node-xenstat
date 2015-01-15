@@ -62,8 +62,11 @@ NAN_METHOD(Collect) {
 NAN_METHOD(CollectSync) {
   NanScope();
 
+  // Flags is optional and defaults to XENSTAT_ALL
+  uint32_t flags = (args[0]->IsNumber()) ? args[0]->Uint32Value() : XENSTAT_ALL;
+
   Local<Value> argv[1];
-  argv[0] = NanNew<External>(xenstat_get_node(xhandle, XENSTAT_ALL));
+  argv[0] = NanNew<External>(xenstat_get_node(xhandle, flags));
 
   NanReturnValue(Node::NewInstance(1, argv));
 }
