@@ -18,7 +18,7 @@ class CollectWorker : public NanAsyncWorker {
 
     void Execute() {
       // Asynchronously call xenstat
-      xnode_ = xenstat_get_node(xhandle, XENSTAT_ALL);
+      xnode_ = xenstat_get_node(xhandle, flags_);
       if (xnode_ == NULL)
         SetErrorMessage("Failed to retrieve statistics from libxenstat");
     }
