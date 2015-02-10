@@ -1,6 +1,4 @@
 #include "domain.h"
-#include "network.h"
-#include "vbd.h"
 
 namespace Xenstat {
 
@@ -18,186 +16,83 @@ NAN_METHOD(Domain::New) {
   Local<External> wrap = Local<External>::Cast(args[0]);
   xenstat_domain *xdomain = static_cast<xenstat_domain*>(wrap->Value());
 
-  Domain *domain = new Domain(xdomain);
-  domain->Wrap(args.This());
+  Local<Object> domain = NanNew<Object>();
 
-  NanReturnValue(args.This());
-}
+  domain->Set(NanNew<String>("id"), NanNew<Number>(xenstat_domain_id(xdomain)));
+  domain->Set(NanNew<String>("name"), NanNew<String>(xenstat_domain_name(xdomain)));
+  domain->Set(NanNew<String>("cpu_ns"), NanNew<Number>(xenstat_domain_cpu_ns(xdomain)));
 
-NAN_GETTER(Domain::GetId) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_id(domain->xdomain_)));
-}
+  // Vcpus (currently not implemented)
+  domain->Set(NanNew<String>("num_vcpus"), NanNew<Number>(xenstat_domain_num_vcpus(xdomain)));
+  domain->Set(NanNew<String>("vcpus"), NanUndefined());
 
-NAN_GETTER(Domain::GetName) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<String>(xenstat_domain_name(domain->xdomain_)));
-}
+  // Memory
+  domain->Set(NanNew<String>("cur_mem"), NanNew<Number>(xenstat_domain_cur_mem(xdomain)));
+  domain->Set(NanNew<String>("max_mem"), NanNew<Number>(xenstat_domain_max_mem(xdomain)));
 
-NAN_GETTER(Domain::GetCpuNs) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_cpu_ns(domain->xdomain_)));
-}
+  domain->Set(NanNew<String>("ssid"), NanNew<Number>(xenstat_domain_ssid(xdomain)));
 
-NAN_GETTER(Domain::GetNumVcpus) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_num_vcpus(domain->xdomain_)));
-}
+  // States
+  domain->Set(NanNew<String>("dying"), NanNew<Boolean>(xenstat_domain_dying(xdomain)));
+  domain->Set(NanNew<String>("crashed"), NanNew<Boolean>(xenstat_domain_crashed(xdomain)));
+  domain->Set(NanNew<String>("shutdown"), NanNew<Boolean>(xenstat_domain_shutdown(xdomain)));
+  domain->Set(NanNew<String>("paused"), NanNew<Boolean>(xenstat_domain_paused(xdomain)));
+  domain->Set(NanNew<String>("blocked"), NanNew<Boolean>(xenstat_domain_blocked(xdomain)));
+  domain->Set(NanNew<String>("running"), NanNew<Boolean>(xenstat_domain_running(xdomain)));
 
-NAN_GETTER(Domain::GetVcpus) {
-  NanScope();
-  NanReturnUndefined();
-}
-
-NAN_GETTER(Domain::GetCurMem) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_cur_mem(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetMaxMem) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_max_mem(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetSsid) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_ssid(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetDying) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_dying(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetCrashed) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_crashed(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetShutdown) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_shutdown(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetPaused) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_paused(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetBlocked) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_blocked(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetRunning) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Boolean>(xenstat_domain_running(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetNumNetworks) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_num_networks(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetNetworks) {
-  NanScope();
-  Domain* domain = ObjectWrap::Unwrap<Domain>(args.This());
-
-  uint32_t num_networks = xenstat_domain_num_networks(domain->xdomain_);
-
-  Local<Array> array = NanNew<Array>(num_networks);
+  // Networks
+  uint32_t num_networks = xenstat_domain_num_networks(xdomain);
+  Local<Object> networks = NanNew<Array>(num_networks);
 
   for (uint32_t i = 0; i < num_networks; ++i) {
-    Local<Value> argv[] = {
-      NanNew<External>(xenstat_domain_network(domain->xdomain_, i))
-    };
+    xenstat_network *xnetwork = xenstat_domain_network(xdomain, i);
+    Local<Object> network = NanNew<Object>();
 
-    array->Set(i, Network::NewInstance(1, argv));
+    network->Set(NanNew<String>("id"), NanNew<Number>(xenstat_network_id(xnetwork)));
+    network->Set(NanNew<String>("rbytes"), NanNew<Number>(xenstat_network_rbytes(xnetwork)));
+    network->Set(NanNew<String>("rpackets"), NanNew<Number>(xenstat_network_rpackets(xnetwork)));
+    network->Set(NanNew<String>("rerrs"), NanNew<Number>(xenstat_network_rerrs(xnetwork)));
+    network->Set(NanNew<String>("rdrop"), NanNew<Number>(xenstat_network_rdrop(xnetwork)));
+    network->Set(NanNew<String>("tbytes"), NanNew<Number>(xenstat_network_tbytes(xnetwork)));
+    network->Set(NanNew<String>("tpackets"), NanNew<Number>(xenstat_network_tpackets(xnetwork)));
+    network->Set(NanNew<String>("terrs"), NanNew<Number>(xenstat_network_terrs(xnetwork)));
+    network->Set(NanNew<String>("tdrop"), NanNew<Number>(xenstat_network_tdrop(xnetwork)));
+
+    networks->Set(i, network);
   }
 
-  NanReturnValue(array);
-}
+  domain->Set(NanNew<String>("num_networks"), NanNew<Number>(num_networks));
+  domain->Set(NanNew<String>("networks"), networks);
 
-NAN_GETTER(Domain::GetNumVbds) {
-  NanScope();
-  Domain *domain = ObjectWrap::Unwrap<Domain>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_domain_num_vbds(domain->xdomain_)));
-}
-
-NAN_GETTER(Domain::GetVbds) {
-  NanScope();
-  Domain* domain = ObjectWrap::Unwrap<Domain>(args.This());
-
-  uint32_t num_vbds = xenstat_domain_num_vbds(domain->xdomain_);
-
-  Local<Array> array = NanNew<Array>(num_vbds);
+  // Vbds (virtual block devices)
+  uint32_t num_vbds = xenstat_domain_num_vbds(xdomain);
+  Local<Object> vbds = NanNew<Array>(num_vbds);
 
   for (uint32_t i = 0; i < num_vbds; ++i) {
-    Local<Value> argv[] = {
-      NanNew<External>(xenstat_domain_vbd(domain->xdomain_, i))
-    };
+    xenstat_vbd *xvbd = xenstat_domain_vbd(xdomain, i);
+    Local<Object> vbd = NanNew<Object>();
 
-    array->Set(i, Vbd::NewInstance(1, argv));
+    vbd->Set(NanNew<String>("type"), NanNew<Number>(xenstat_vbd_type(xvbd)));
+    vbd->Set(NanNew<String>("dev"), NanNew<Number>(xenstat_vbd_dev(xvbd)));
+    vbd->Set(NanNew<String>("oo_reqs"), NanNew<Number>(xenstat_vbd_oo_reqs(xvbd)));
+    vbd->Set(NanNew<String>("rd_reqs"), NanNew<Number>(xenstat_vbd_rd_reqs(xvbd)));
+    vbd->Set(NanNew<String>("rw_reqs"), NanNew<Number>(xenstat_vbd_wr_reqs(xvbd)));
+    vbd->Set(NanNew<String>("rd_sects"), NanNew<Number>(xenstat_vbd_rd_sects(xvbd)));
+    vbd->Set(NanNew<String>("wr_sects"), NanNew<Number>(xenstat_vbd_wr_sects(xvbd)));
+
+    vbds->Set(i, vbd);
   }
 
-  NanReturnValue(array);
+  domain->Set(NanNew<String>("num_vbds"), NanNew<Number>(num_vbds));
+  domain->Set(NanNew<String>("vbds"), vbds);
+
+  NanReturnValue(domain);
 }
 
 void Domain::Init(Handle<Object> target) {
   NanScope();
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("id"), GetId);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("name"), GetName);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("cpu_ns"), GetCpuNs);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_vcpus"), GetNumVcpus);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("vcpus"), GetVcpus);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("cur_mem"), GetCurMem);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("max_mem"), GetMaxMem);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("ssid"), GetSsid);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("dying"), GetDying);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("crashed"), GetCrashed);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("shutdown"), GetShutdown);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("paused"), GetPaused);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("blocked"), GetBlocked);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("running"), GetRunning);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_networks"), GetNumNetworks);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("networks"), GetNetworks);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("num_vbds"), GetNumVbds);
-  tpl->InstanceTemplate()->SetAccessor(
-    NanNew("vbds"), GetVbds);
 
   NanAssignPersistent(constructor, tpl);
 }

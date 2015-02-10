@@ -2,9 +2,7 @@
 
 #include "node_xenstat.h"
 #include "domain.h"
-#include "node.h"
-#include "network.h"
-#include "vbd.h"
+#include "stats.h"
 
 namespace Xenstat {
 
@@ -31,7 +29,7 @@ class CollectWorker : public NanAsyncWorker {
       // Create a new Node V8 Object with the xnode from the asynchronous
       // call to xenstat.
       argv[0] = NanNew<External>(xnode_);
-      Local<Value> node = NanNew<Value>(Node::NewInstance(1, argv));
+      Local<Value> node = NanNew<Value>(Stats::NewInstance(1, argv));
 
       argv[0] = NanNull();
       argv[1] = node;
@@ -68,7 +66,7 @@ NAN_METHOD(CollectSync) {
   Local<Value> argv[1];
   argv[0] = NanNew<External>(xenstat_get_node(xhandle, flags));
 
-  NanReturnValue(Node::NewInstance(1, argv));
+  NanReturnValue(Stats::NewInstance(1, argv));
 }
 
 static void Init(Handle<Object> target) {
@@ -85,9 +83,7 @@ static void Init(Handle<Object> target) {
     NanNew<FunctionTemplate>(CollectSync)->GetFunction());
 
   Domain::Init(target);
-  Node::Init(target);
-  Network::Init(target);
-  Vbd::Init(target);
+  Stats::Init(target);
 }
 
 } // namespace

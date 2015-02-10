@@ -5,9 +5,7 @@
       "sources": [
         "src/node_xenstat.cc",
         "src/domain.cc",
-        "src/node.cc",
-        "src/network.cc",
-        "src/vbd.cc",
+        "src/stats.cc"
       ],
       "include_dirs" : [
         "<!(node -e \"require('nan')\")",

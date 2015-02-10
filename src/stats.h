@@ -5,13 +5,13 @@
 
 namespace Xenstat {
 
-class Node : public ObjectWrap {
+class Stats : public ObjectWrap {
   public:
     static void Init(Handle<Object> target);
     static Handle<Value> NewInstance(int argc, Handle<Value> *argv);
 
-    Node(xenstat_node *xnode) : xnode_(xnode) {};
-    ~Node();
+    Stats(xenstat_node *xnode) : xnode_(xnode) {};
+    ~Stats();
 
     static NAN_METHOD(New);
 

@@ -1,85 +1,85 @@
 #include "node_xenstat.h"
-#include "node.h"
+#include "stats.h"
 #include "domain.h"
 
 namespace Xenstat {
 
 static Persistent<FunctionTemplate> constructor;
 
-Node::~Node() {
+Stats::~Stats() {
   if (xnode_ != NULL)
     xenstat_free_node(xnode_);
 }
 
-Handle<Value> Node::NewInstance(int argc, Handle<Value> *argv) {
+Handle<Value> Stats::NewInstance(int argc, Handle<Value> *argv) {
   Local<FunctionTemplate> constructorHandle = NanNew(constructor);
   return constructorHandle->GetFunction()->NewInstance(argc, argv);
 }
 
-NAN_METHOD(Node::New) {
+NAN_METHOD(Stats::New) {
   NanScope();
   assert(args.IsConstructCall());
 
   Local<External> wrap = Local<External>::Cast(args[0]);
-  Node *node = new Node(static_cast<xenstat_node*>(wrap->Value()));
-  node->Wrap(args.This());
+  Stats *stats = new Stats(static_cast<xenstat_node*>(wrap->Value()));
+  stats->Wrap(args.This());
 
   NanReturnValue(args.This());
 }
 
-NAN_GETTER(Node::GetXenVersion) {
+NAN_GETTER(Stats::GetXenVersion) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<String>(xenstat_node_xen_version(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<String>(xenstat_node_xen_version(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetTotMem) {
+NAN_GETTER(Stats::GetTotMem) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_tot_mem(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_tot_mem(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetFreeMem) {
+NAN_GETTER(Stats::GetFreeMem) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_free_mem(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_free_mem(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetFreeableMb) {
+NAN_GETTER(Stats::GetFreeableMb) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_freeable_mb(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_freeable_mb(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetNumDomains) {
+NAN_GETTER(Stats::GetNumDomains) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_num_domains(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_num_domains(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetNumCpus) {
+NAN_GETTER(Stats::GetNumCpus) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_num_cpus(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_num_cpus(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetCpuHz) {
+NAN_GETTER(Stats::GetCpuHz) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
-  NanReturnValue(NanNew<Number>(xenstat_node_cpu_hz(node->xnode_)));
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
+  NanReturnValue(NanNew<Number>(xenstat_node_cpu_hz(stats->xnode_)));
 }
 
-NAN_GETTER(Node::GetDomains) {
+NAN_GETTER(Stats::GetDomains) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
 
-  uint32_t num_domains = xenstat_node_num_domains(node->xnode_);
+  uint32_t num_domains = xenstat_node_num_domains(stats->xnode_);
 
   Local<Array> array = NanNew<Array>(num_domains);
 
   for (uint32_t i = 0; i < num_domains; ++i) {
     Local<Value> argv[] = {
-      NanNew<External>(xenstat_node_domain_by_index(node->xnode_, i))
+      NanNew<External>(xenstat_node_domain_by_index(stats->xnode_, i))
     };
 
     array->Set(i, Domain::NewInstance(1, argv));
@@ -88,9 +88,9 @@ NAN_GETTER(Node::GetDomains) {
   NanReturnValue(array);
 }
 
-NAN_METHOD(Node::GetDomainById) {
+NAN_METHOD(Stats::GetDomainById) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
 
   if (!args[0]->IsNumber()) {
     return NanThrowError("Domain ID must be a number");
@@ -99,15 +99,15 @@ NAN_METHOD(Node::GetDomainById) {
   uint32_t id = args[0]->Uint32Value();
 
   Local<Value> argv[] = {
-    NanNew<External>(xenstat_node_domain(node->xnode_, id))
+    NanNew<External>(xenstat_node_domain(stats->xnode_, id))
   };
 
   NanReturnValue(Domain::NewInstance(1, argv));
 }
 
-NAN_METHOD(Node::GetDomainByName) {
+NAN_METHOD(Stats::GetDomainByName) {
   NanScope();
-  Node* node = ObjectWrap::Unwrap<Node>(args.This());
+  Stats* stats = ObjectWrap::Unwrap<Stats>(args.This());
 
   if (!args[0]->IsString()) {
     return NanThrowError("Domain name must be a string");
@@ -118,10 +118,10 @@ NAN_METHOD(Node::GetDomainByName) {
   // Libxenstat doesn't provide a method for retrieving domain by
   // name. We need to loop through each domain and compare name.
 
-  uint32_t num_domains = xenstat_node_num_domains(node->xnode_);
+  uint32_t num_domains = xenstat_node_num_domains(stats->xnode_);
 
   for (uint32_t i = 0; i < num_domains; ++i) {
-    xenstat_domain *xdomain = xenstat_node_domain_by_index(node->xnode_, i);
+    xenstat_domain *xdomain = xenstat_node_domain_by_index(stats->xnode_, i);
 
     if (name == xenstat_domain_name(xdomain)) {
       // Found match
@@ -136,7 +136,7 @@ NAN_METHOD(Node::GetDomainByName) {
   NanReturnUndefined();
 }
 
-void Node::Init(Handle<Object> target) {
+void Stats::Init(Handle<Object> target) {
   NanScope();
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
