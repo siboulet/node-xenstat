@@ -22,9 +22,22 @@ NAN_METHOD(Domain::New) {
   domain->Set(NanNew<String>("name"), NanNew<String>(xenstat_domain_name(xdomain)));
   domain->Set(NanNew<String>("cpu_ns"), NanNew<Number>(xenstat_domain_cpu_ns(xdomain)));
 
-  // Vcpus (currently not implemented)
-  domain->Set(NanNew<String>("num_vcpus"), NanNew<Number>(xenstat_domain_num_vcpus(xdomain)));
-  domain->Set(NanNew<String>("vcpus"), NanUndefined());
+  // Vcpus
+  uint32_t num_vcpus = xenstat_domain_num_vcpus(xdomain);
+  Local<Object> vcpus = NanNew<Array>(num_vcpus);
+
+  for (uint32_t i = 0; i < num_vcpus; ++i) {
+    xenstat_vcpu *xvcpu = xenstat_domain_vcpu(xdomain, i);
+    Local<Object> vcpu = NanNew<Object>();
+
+    vcpu->Set(NanNew<String>("online"), NanNew<Boolean>(xenstat_vcpu_online(xvcpu)));
+    vcpu->Set(NanNew<String>("ns"), NanNew<Number>(xenstat_vcpu_ns(xvcpu)));
+
+    vcpus->Set(i, vcpu);
+  }
+
+  domain->Set(NanNew<String>("num_vcpus"), NanNew<Number>(num_vcpus));
+  domain->Set(NanNew<String>("vcpus"), vcpus);
 
   // Memory
   domain->Set(NanNew<String>("cur_mem"), NanNew<Number>(xenstat_domain_cur_mem(xdomain)));
