@@ -99,6 +99,17 @@ NAN_METHOD(Domain::New) {
   domain->Set(NanNew<String>("num_vbds"), NanNew<Number>(num_vbds));
   domain->Set(NanNew<String>("vbds"), vbds);
 
+  // Tmem (transcendent memory)
+  xenstat_tmem *xtmem = xenstat_domain_tmem(xdomain);
+  Local<Object> tmem = NanNew<Object>();
+
+  tmem->Set(NanNew<String>("curr_eph_pages"), NanNew<Number>(xenstat_tmem_curr_eph_pages(xtmem)));
+  tmem->Set(NanNew<String>("succ_eph_gets"), NanNew<Number>(xenstat_tmem_succ_eph_gets(xtmem)));
+  tmem->Set(NanNew<String>("succ_pers_puts"), NanNew<Number>(xenstat_tmem_succ_pers_puts(xtmem)));
+  tmem->Set(NanNew<String>("succ_pers_gets"), NanNew<Number>(xenstat_tmem_succ_pers_gets(xtmem)));
+
+  domain->Set(NanNew<String>("tmem"), tmem);
+
   NanReturnValue(domain);
 }
 
