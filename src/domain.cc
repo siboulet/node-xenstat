@@ -28,6 +28,8 @@ NAN_METHOD(Domain::New) {
 
   for (uint32_t i = 0; i < num_vcpus; ++i) {
     xenstat_vcpu *xvcpu = xenstat_domain_vcpu(xdomain, i);
+    if (!xvcpu) break;
+
     Local<Object> vcpu = NanNew<Object>();
 
     vcpu->Set(NanNew<String>("online"), NanNew<Boolean>(xenstat_vcpu_online(xvcpu)));
@@ -59,6 +61,8 @@ NAN_METHOD(Domain::New) {
 
   for (uint32_t i = 0; i < num_networks; ++i) {
     xenstat_network *xnetwork = xenstat_domain_network(xdomain, i);
+    if (!xnetwork) break;
+
     Local<Object> network = NanNew<Object>();
 
     network->Set(NanNew<String>("id"), NanNew<Number>(xenstat_network_id(xnetwork)));
@@ -83,6 +87,8 @@ NAN_METHOD(Domain::New) {
 
   for (uint32_t i = 0; i < num_vbds; ++i) {
     xenstat_vbd *xvbd = xenstat_domain_vbd(xdomain, i);
+    if (!xvbd) break;
+
     Local<Object> vbd = NanNew<Object>();
 
     vbd->Set(NanNew<String>("type"), NanNew<Number>(xenstat_vbd_type(xvbd)));
