@@ -136,7 +136,7 @@ NAN_METHOD(Stats::GetDomainByName) {
   NanReturnUndefined();
 }
 
-void Stats::Init(Handle<Object> target) {
+void Stats::Init(Handle<Object> exports) {
   NanScope();
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);

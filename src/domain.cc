@@ -113,7 +113,7 @@ NAN_METHOD(Domain::New) {
   NanReturnValue(domain);
 }
 
-void Domain::Init(Handle<Object> target) {
+void Domain::Init(Handle<Object> exports) {
   NanScope();
 
   Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);

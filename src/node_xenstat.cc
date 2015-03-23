@@ -69,7 +69,7 @@ NAN_METHOD(CollectSync) {
   NanReturnValue(Stats::NewInstance(1, argv));
 }
 
-static void Init(Handle<Object> target) {
+static void Init(Handle<Object> exports) {
   NanScope();
 
   if (xhandle == NULL) {
@@ -77,13 +77,21 @@ static void Init(Handle<Object> target) {
     return;
   }
 
-  target->Set(NanNew<String>("collect"),
+  exports->Set(NanNew<String>("collect"),
     NanNew<FunctionTemplate>(Collect)->GetFunction());
-  target->Set(NanNew<String>("collectSync"),
+  exports->Set(NanNew<String>("collectSync"),
     NanNew<FunctionTemplate>(CollectSync)->GetFunction());
 
-  Domain::Init(target);
-  Stats::Init(target);
+
+  // Flags from xenstat.h
+  exports->Set(NanNew("VCPU"), NanNew<Number>(XENSTAT_VCPU));
+  exports->Set(NanNew("NETWORK"), NanNew<Number>(XENSTAT_NETWORK));
+  exports->Set(NanNew("XEN_VERSION"), NanNew<Number>(XENSTAT_XEN_VERSION));
+  exports->Set(NanNew("VBD"), NanNew<Number>(XENSTAT_VBD));
+  exports->Set(NanNew("ALL"), NanNew<Number>(XENSTAT_ALL));
+
+  Domain::Init(exports);
+  Stats::Init(exports);
 }
 
 } // namespace
